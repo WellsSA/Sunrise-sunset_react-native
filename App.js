@@ -6,6 +6,7 @@ import axios from 'axios';
 
 export default function App() {
   const [city, setCity] = useState('curitiba');
+  const [current, setCurrent] = useState(undefined);
 
   const callApi = async () => {
     if (!city) return;
@@ -25,7 +26,29 @@ export default function App() {
         },
       ] = data.list;
 
-      console.log({ lat, lon });
+      const {
+        data: {
+          current: {
+            sunrise,
+            sunset,
+            feels_like,
+            weather: { icon },
+          },
+        },
+      } = await api.get('/onecall', {
+        params: {
+          lat,
+          lon,
+          appid: OPEN_WEATHER_API_KEY,
+        },
+      });
+
+      setCurrent({
+        sunrise,
+        sunset,
+        feels_like,
+        icon,
+      });
     } catch (error) {
       Alert.alert('An error occurred', error.message, [
         {
@@ -35,15 +58,6 @@ export default function App() {
       ]);
       console.log({ error });
     }
-
-    // const data = await axios.get('https://pokeapi.co/api/v2');
-
-    // const data = await api.get('/find', {
-    //   query: {
-    //     q: city,
-    //     appid: OPEN_WEATHER_API_KEY,
-    //   },
-    // });
   };
 
   return (
@@ -57,6 +71,7 @@ export default function App() {
         />
         <Button title="Ok" style={styles.confirmButton} onPress={callApi} />
       </View>
+      <Text>{current ? JSON.stringify(current) : 'a'}</Text>
     </View>
   );
 }
