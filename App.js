@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,17 +8,13 @@ import {
   Alert,
   Image,
 } from 'react-native';
+
 import { OPEN_WEATHER_API_KEY } from 'react-native-dotenv';
 import api from './services/api';
 
 export default function App() {
   const [city, setCity] = useState('');
   const [current, setCurrent] = useState(undefined);
-
-  useEffect(() => {
-    const _x = async () => await callApi();
-    _x();
-  }, []);
 
   const callApi = async () => {
     if (!city) return;
@@ -65,7 +61,6 @@ export default function App() {
           style: 'default',
         },
       ]);
-      console.log({ error });
     }
   };
 
@@ -80,25 +75,27 @@ export default function App() {
         />
         <Button title="Ok" style={styles.confirmButton} onPress={callApi} />
       </View>
-      {current ? (
-        <View style={styles.main}>
-          <Image
-            style={{ width: 100, height: 100 }}
-            source={{
-              uri: current.imageURL,
-            }}
-          />
-          <Text>
-            Nascer do sol: {new Date(current.sunrise).toLocaleTimeString()}
-          </Text>
-          <Text>
-            Pôr do sol: {new Date(current.sunset).toLocaleTimeString()}
-          </Text>
-          <Text>Sensação térmica: {current.feels_like}</Text>
-        </View>
-      ) : (
-        <></>
-      )}
+      <View style={styles.main}>
+        {current ? (
+          <>
+            <Image
+              style={{ width: 100, height: 100 }}
+              source={{
+                uri: current.imageURL,
+              }}
+            />
+            <Text>
+              Nascer do sol: {new Date(current.sunrise).toLocaleTimeString()}
+            </Text>
+            <Text>
+              Pôr do sol: {new Date(current.sunset).toLocaleTimeString()}
+            </Text>
+            <Text>Sensação térmica: {current.feels_like}</Text>
+          </>
+        ) : (
+          <Text>Nenhuma cidade selecionada</Text>
+        )}
+      </View>
     </View>
   );
 }
