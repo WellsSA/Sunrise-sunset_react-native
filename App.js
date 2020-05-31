@@ -1,12 +1,24 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  Button,
+  Alert,
+  Image,
+} from 'react-native';
 import { OPEN_WEATHER_API_KEY } from 'react-native-dotenv';
 import api from './services/api';
-import axios from 'axios';
 
 export default function App() {
-  const [city, setCity] = useState('curitiba');
+  const [city, setCity] = useState('');
   const [current, setCurrent] = useState(undefined);
+
+  useEffect(() => {
+    const _x = async () => await callApi();
+    _x();
+  }, []);
 
   const callApi = async () => {
     if (!city) return;
@@ -28,12 +40,7 @@ export default function App() {
 
       const {
         data: {
-          current: {
-            sunrise,
-            sunset,
-            feels_like,
-            weather: { icon },
-          },
+          current: { sunrise, sunset, feels_like, weather },
         },
       } = await api.get('/onecall', {
         params: {
@@ -47,8 +54,10 @@ export default function App() {
         sunrise,
         sunset,
         feels_like,
-        icon,
+        imageURL: `https://openweathermap.org/img/wn/${weather[0].icon}.png`,
       });
+
+      console.log({ weather });
     } catch (error) {
       Alert.alert('An error occurred', error.message, [
         {
@@ -71,7 +80,25 @@ export default function App() {
         />
         <Button title="Ok" style={styles.confirmButton} onPress={callApi} />
       </View>
-      <Text>{current ? JSON.stringify(current) : 'a'}</Text>
+      {current ? (
+        <View style={styles.main}>
+          <Image
+            style={{ width: 100, height: 100 }}
+            source={{
+              uri: current.imageURL,
+            }}
+          />
+          <Text>
+            Nascer do sol: {new Date(current.sunrise).toLocaleTimeString()}
+          </Text>
+          <Text>
+            Pôr do sol: {new Date(current.sunset).toLocaleTimeString()}
+          </Text>
+          <Text>Sensação térmica: {current.feels_like}</Text>
+        </View>
+      ) : (
+        <></>
+      )}
     </View>
   );
 }
@@ -99,5 +126,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 8,
+  },
+  main: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
